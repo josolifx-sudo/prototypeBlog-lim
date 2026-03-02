@@ -1,0 +1,8 @@
+{
+    "url": "https://prototype-blog-lim.vercel.app",
+    "endpoints": {
+        "register": "/register",
+        "login": "/login",
+        "posts": ""
+    }
+}
