@@ -9,7 +9,7 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   try {
     const posts = await Post.find()
-      .populate("author", "username isAdmin")
+      .populate("author", "username isAdmin avatarUrl")
       .sort({ createdAt: -1 });
 
     return res.json({ posts });
@@ -21,11 +21,11 @@ router.get("/", async (req, res) => {
 // Public single post with comments
 router.get("/:id", async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id).populate("author", "username isAdmin");
+    const post = await Post.findById(req.params.id).populate("author", "username isAdmin avatarUrl");
     if (!post) return res.status(404).json({ error: "Post not found" });
 
     const comments = await Comment.find({ post: post._id })
-      .populate("author", "username isAdmin")
+      .populate("author", "username isAdmin avatarUrl")
       .sort({ createdAt: 1 });
 
     return res.json({ post, comments });
@@ -46,7 +46,7 @@ router.post("/", requireAuth, async (req, res) => {
       author: req.user._id
     });
 
-    const populated = await Post.findById(post._id).populate("author", "username isAdmin");
+    const populated = await Post.findById(post._id).populate("author", "username isAdmin avatarUrl");
 
     return res.status(201).json({ message: "Post created", post: populated });
   } catch (err) {
@@ -70,7 +70,7 @@ router.put("/:id", requireAuth, async (req, res) => {
 
     await post.save();
 
-    const populated = await Post.findById(post._id).populate("author", "username isAdmin");
+    const populated = await Post.findById(post._id).populate("author", "username isAdmin avatarUrl");
 
     return res.json({ message: "Post updated", post: populated });
   } catch (err) {
