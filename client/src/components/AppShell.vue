@@ -227,6 +227,6 @@ export default {
   padding-bottom: 30px;
 }
 .mainpad {
-  padding-top: calc(var(--header-h) + 14px);
+  padding-top: calc(var(--header-h) + 10px);
 }
 </style>
