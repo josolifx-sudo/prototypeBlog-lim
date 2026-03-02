@@ -167,7 +167,14 @@
 
       async function handleUpdateComment(payload) {
         const res = await posts.updateComment(payload.commentId, payload.text);
-        if (!res.ok) return;
+
+        if (res.ok) {
+          // Always refresh from server to guarantee the UI shows the latest
+          await posts.fetchPost(route.params.id);
+          if (payload.done) payload.done(true);
+        } else {
+          if (payload.done) payload.done(false, res.error);
+        }
       }
   
       onMounted(load);

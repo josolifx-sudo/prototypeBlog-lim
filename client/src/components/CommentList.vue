@@ -110,11 +110,18 @@ export default {
         return;
       }
 
-      this.$emit("updateComment", { commentId: id, text });
-      this.cancelEdit();
+      this.$emit("updateComment", {
+        commentId: id,
+        text,
+        done: (ok, errMsg) => {
+          if (ok) {
+            this.cancelEdit();
+          } else {
+            this.localError = errMsg || "Update failed";
+          }
+        }
+      });
     }
-  }
-};
 </script>
 
 <style scoped>
