@@ -7,7 +7,7 @@
       </div>
 
       <div class="avatarBig">
-        <img v-if="auth.user?.avatarUrl" :src="auth.user.avatarUrl" alt="avatar" />
+        <img v-if="auth.user?.avatarUrl" :src="auth.user.avatarUrl" />
         <div v-else class="avatarFallback">{{ initials }}</div>
       </div>
     </div>
@@ -29,47 +29,46 @@
       </div>
 
       <div class="photos">
-        <div class="photosTop">
-          <div>
-            <div class="sectionTitle">Your photos</div>
-            <div class="muted">Maximum 5. Choose one as your display picture.</div>
-          </div>
-
-          <div class="countPill">{{ (auth.user.photos || []).length }}/5</div>
-        </div>
+        <div class="sectionTitle">Your Photos (Max 5)</div>
 
         <div class="addRow">
-          <input class="input" v-model="newUrl" placeholder="Paste an image URL (https://...)" />
-          <button class="btn btn-primary" :disabled="addDisabled" @click="add">
-            Add
+          <input class="input" v-model="newUrl" placeholder="Paste direct image URL" />
+          <button class="btn btn-primary" :disabled="!newUrl" @click="addUrl">
+            Add URL
           </button>
         </div>
 
-        <div v-if="auth.error" class="muted err">{{ auth.error }}</div>
-
-        <div v-if="(auth.user.photos || []).length === 0" class="muted pad">
-          No photos yet. Add one to set your display picture.
+        <div class="uploadRow">
+          <input ref="fileRef" class="input" type="file" accept="image/*" />
+          <button class="btn btn-primary" :disabled="uploading" @click="uploadFile">
+            {{ uploading ? "Uploading..." : "Upload File" }}
+          </button>
         </div>
 
-        <div v-else class="thumbGrid">
+        <div v-if="auth.error" class="err">{{ auth.error }}</div>
+
+        <div class="thumbGrid" v-if="auth.user.photos?.length">
           <div v-for="p in auth.user.photos" :key="p" class="thumb glass">
-            <img :src="p" alt="photo" />
+            <img :src="p" />
             <div class="thumbActions">
               <button
                 class="btn btn-ghost"
                 :disabled="auth.user.avatarUrl === p"
-                @click="setAsAvatar(p)"
+                @click="setAvatar(p)"
               >
                 {{ auth.user.avatarUrl === p ? "Current" : "Set DP" }}
               </button>
-              <button class="btn btn-danger" @click="remove(p)">Remove</button>
+
+              <button class="btn btn-danger" @click="remove(p)">
+                Remove
+              </button>
             </div>
           </div>
         </div>
+
+        <div v-else class="muted">No photos yet.</div>
       </div>
     </div>
-
-    <div v-else class="muted pulse">Loading profile...</div>
   </div>
 </template>
 
@@ -78,34 +77,37 @@ import { computed, onMounted, ref } from "vue";
 import { useAuthStore } from "../stores/auth";
 
 export default {
-  name: "ProfilePage",
   setup() {
     const auth = useAuthStore();
     const newUrl = ref("");
+    const fileRef = ref(null);
+    const uploading = ref(false);
 
-    const initials = computed(() => {
-      const u = auth.user?.username || "U";
-      return u.slice(0, 2).toUpperCase();
-    });
+    const initials = computed(() =>
+      (auth.user?.username || "U").slice(0, 2).toUpperCase()
+    );
 
-    const addDisabled = computed(() => {
-      const count = (auth.user?.photos || []).length;
-      return !newUrl.value.trim() || count >= 5;
-    });
-
-    async function add() {
-      const url = newUrl.value.trim();
-      if (!url) return;
-
-      const res = await auth.addPhoto(url);
+    async function addUrl() {
+      if (!newUrl.value) return;
+      const res = await auth.addPhoto(newUrl.value.trim());
       if (res.ok) newUrl.value = "";
+    }
+
+    async function uploadFile() {
+      if (!fileRef.value?.files?.length) return;
+
+      uploading.value = true;
+      const res = await auth.uploadPhotoFile(fileRef.value.files[0]);
+      uploading.value = false;
+
+      if (res.ok) fileRef.value.value = "";
     }
 
     async function remove(url) {
       await auth.removePhoto(url);
     }
 
-    async function setAsAvatar(url) {
+    async function setAvatar(url) {
       await auth.setAvatar(url);
     }
 
@@ -113,122 +115,88 @@ export default {
       if (auth.token && !auth.user) await auth.fetchMe();
     });
 
-    return { auth, newUrl, initials, addDisabled, add, remove, setAsAvatar };
+    return {
+      auth,
+      newUrl,
+      initials,
+      addUrl,
+      fileRef,
+      uploadFile,
+      uploading,
+      remove,
+      setAvatar
+    };
   }
 };
 </script>
 
 <style scoped>
-.box { padding: 16px; border-radius: var(--radius); }
+.box { padding: 20px; border-radius: 20px; }
 
 .hdr {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 14px;
-  margin-bottom: 12px;
 }
 
-.title { font-size: 24px; font-weight: 900; margin-bottom: 4px; }
+.title { font-size: 24px; font-weight: 900; }
 
 .avatarBig {
-  width: 64px;
-  height: 64px;
+  width: 70px;
+  height: 70px;
   border-radius: 18px;
-  border: 1px solid var(--line);
-  background: rgba(255,255,255,0.8);
   overflow: hidden;
-  display: grid;
-  place-items: center;
-  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--line);
 }
 
 .avatarBig img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
 }
 
-.avatarFallback { font-weight: 900; }
-
-.grid { margin-top: 10px; display: grid; gap: 10px; }
+.avatarFallback {
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+}
 
 .row {
   display: grid;
-  grid-template-columns: 140px 1fr;
-  gap: 10px;
-  padding: 12px;
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  background: rgba(255,255,255,0.65);
+  grid-template-columns: 120px 1fr;
+  margin: 8px 0;
 }
 
-.label { font-weight: 850; color: var(--muted); }
-.value { font-weight: 750; }
+.photos { margin-top: 20px; }
 
-.photos {
-  margin-top: 8px;
-  padding: 12px;
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  background: rgba(255,255,255,0.65);
-}
+.sectionTitle { font-weight: 800; margin-bottom: 10px; }
 
-.sectionTitle { font-weight: 900; margin-bottom: 2px; }
-
-.photosTop {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 10px;
-}
-
-.countPill {
-  padding: 8px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  background: rgba(255,255,255,0.75);
-  font-weight: 850;
-}
-
-.addRow {
-  margin-top: 10px;
+.addRow,
+.uploadRow {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 10px;
+  margin-bottom: 10px;
 }
 
 .thumbGrid {
-  margin-top: 12px;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
-}
-
-.thumb {
-  border-radius: 16px;
-  overflow: hidden;
-  padding: 10px;
 }
 
 .thumb img {
   width: 100%;
   height: 160px;
   object-fit: cover;
-  border-radius: 14px;
-  border: 1px solid var(--line);
-  background: rgba(255,255,255,0.8);
-  display: block;
+  border-radius: 12px;
 }
 
 .thumbActions {
-  margin-top: 10px;
   display: flex;
   gap: 10px;
-  flex-wrap: wrap;
+  margin-top: 8px;
 }
 
-.pad { padding: 10px 0; }
-.err { margin-top: 8px; }
+.err { color: #dc2626; margin-bottom: 8px; }
 </style>
