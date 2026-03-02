@@ -41,6 +41,7 @@
         :currentUserId="auth.user?.id || ''"
         :isAdmin="auth.isAdmin"
         @deleteComment="handleDeleteComment"
+        @updateComment="handleUpdateComment"
       />
   
       <div v-if="auth.isLoggedIn">
@@ -163,6 +164,11 @@
         const res = await posts.deleteComment(commentId);
         if (!res.ok) return;        
       }
+
+      async function handleUpdateComment(payload) {
+        const res = await posts.updateComment(payload.commentId, payload.text);
+        if (!res.ok) return;
+      }
   
       onMounted(load);
   
@@ -183,7 +189,8 @@
         removePost,
         submitComment,
         adminDeleteComment,
-        handleDeleteComment
+        handleDeleteComment,
+        handleUpdateComment
       };
     }
   };

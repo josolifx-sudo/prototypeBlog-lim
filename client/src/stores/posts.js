@@ -119,5 +119,23 @@ export const usePostsStore = defineStore("posts", {
         return { ok: false, error: msg };
       }
     },
+
+    async updateComment(commentId, text) {
+      this.error = null;
+      try {
+        const res = await api.put(`/comments/${commentId}`, { text });
+    
+        const updated = res.data.comment;
+    
+        // Instant UI update
+        this.comments = this.comments.map((c) => (c._id === commentId ? updated : c));
+    
+        return { ok: true, comment: updated };
+      } catch (err) {
+        const msg = err?.response?.data?.error || "Failed to update comment";
+        this.error = msg;
+        return { ok: false, error: msg };
+      }
+    },
   }
 });
