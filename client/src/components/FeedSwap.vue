@@ -82,16 +82,20 @@
   }
   
   .thumb {
-    position: absolute;
-    left: 0;
-    top: 6px;
-    height: calc(100% - 12px);
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.10);
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    transition: transform 220ms ease, width 220ms ease;
-    pointer-events: none;
-  }
+  position: absolute;
+  left: 0;
+  top: 6px;
+  height: calc(100% - 12px);
+  border-radius: 999px;
+  background: linear-gradient(
+    135deg,
+    rgba(110, 231, 255, 0.35),
+    rgba(167, 139, 250, 0.30)
+  );
+  box-shadow: 0 0 10px rgba(110, 231, 255, 0.30);
+  transition: transform 220ms ease, width 220ms ease;
+  pointer-events: none;
+}
   
   .tab {
     position: relative;

@@ -186,8 +186,12 @@ export default {
   top: 6px;
   height: calc(100% - 12px);
   border-radius: 999px;
-  background: linear-gradient(135deg, rgba(110, 231, 255, 0.25), rgba(167, 139, 250, 0.22));
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: linear-gradient(
+    135deg,
+    rgba(110, 231, 255, 0.45),
+    rgba(167, 139, 250, 0.40)
+  );
+  box-shadow: 0 0 12px rgba(110, 231, 255, 0.35);
   transition: transform 220ms ease, width 220ms ease;
   pointer-events: none;
 }

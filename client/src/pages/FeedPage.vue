@@ -39,7 +39,7 @@
       <div v-else-if="sortedFeed.length === 0" class="glass pad muted">No posts yet</div>
 
       <div v-else class="list">
-        <ThreadCard v-for="p in sortedFeed" :key="p._id" :post="p" />
+        <StringsCard v-for="p in sortedFeed" :key="p._id" :post="p" />
       </div>
     </section>
   </div>

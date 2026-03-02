@@ -100,8 +100,11 @@ export default {
 }
 
 .card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
   background: var(--panel-strong);
+  box-shadow:
+    0 0 0 1px rgba(110, 231, 255, 0.18),
+    0 14px 40px rgba(0, 0, 0, 0.55);
 }
 
 .spot {
@@ -109,16 +112,15 @@ export default {
   inset: -2px;
   background:
     radial-gradient(
-      420px 300px at var(--sx, 0px) var(--sy, 0px),
-      rgba(110, 231, 255, calc(0.22 * var(--sa, 0))),
+      500px 350px at var(--sx, 0px) var(--sy, 0px),
+      rgba(110, 231, 255, calc(0.35 * var(--sa, 0))),
       transparent 55%
     ),
     radial-gradient(
-      520px 360px at var(--sx, 0px) var(--sy, 0px),
-      rgba(167, 139, 250, calc(0.16 * var(--sa, 0))),
-      transparent 60%
+      650px 450px at var(--sx, 0px) var(--sy, 0px),
+      rgba(167, 139, 250, calc(0.28 * var(--sa, 0))),
+      transparent 65%
     );
-  opacity: 1;
   pointer-events: none;
 }
 
