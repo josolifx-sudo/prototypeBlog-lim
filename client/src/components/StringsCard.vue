@@ -90,21 +90,12 @@ export default {
 
 <style scoped>
 .card {
-  position: relative;
-  padding: 14px;
-  border-radius: var(--radius);
-  cursor: pointer;
-  transform: translateY(0);
-  transition: transform 160ms ease, background 160ms ease, border 160ms ease;
-  overflow: hidden;
+  background: var(--panel);
+  border: 1px solid var(--line);
 }
-
 .card:hover {
-  transform: translateY(-3px);
   background: var(--panel-strong);
-  box-shadow:
-    0 0 0 1px rgba(110, 231, 255, 0.18),
-    0 14px 40px rgba(0, 0, 0, 0.55);
+  box-shadow: var(--shadow);
 }
 
 .spot {
@@ -112,14 +103,14 @@ export default {
   inset: -2px;
   background:
     radial-gradient(
-      500px 350px at var(--sx, 0px) var(--sy, 0px),
-      rgba(110, 231, 255, calc(0.35 * var(--sa, 0))),
-      transparent 55%
+      520px 360px at var(--sx, 0px) var(--sy, 0px),
+      rgba(37, 99, 235, calc(0.18 * var(--sa, 0))),
+      transparent 58%
     ),
     radial-gradient(
-      650px 450px at var(--sx, 0px) var(--sy, 0px),
-      rgba(167, 139, 250, calc(0.28 * var(--sa, 0))),
-      transparent 65%
+      680px 460px at var(--sx, 0px) var(--sy, 0px),
+      rgba(124, 58, 237, calc(0.14 * var(--sa, 0))),
+      transparent 66%
     );
   pointer-events: none;
 }

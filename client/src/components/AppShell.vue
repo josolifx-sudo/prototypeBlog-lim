@@ -136,11 +136,10 @@ export default {
 <style scoped>
 .topbar {
   position: sticky;
-  min-height: var(--header-h);
   top: 0;
   z-index: 10;
-  backdrop-filter: blur(14px);
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(246, 247, 251, 0.72);
+  backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--line);
 }
 
