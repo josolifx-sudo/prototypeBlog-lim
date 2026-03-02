@@ -10,7 +10,9 @@
     <div v-else class="list">
       <div v-for="c in comments" :key="c._id" class="item">
         <div class="left">
-          <div class="badge">{{ (c.author?.username || "U").slice(0, 2).toUpperCase() }}</div>
+          <div class="badge">
+            {{ (c.author?.username || "U").slice(0, 2).toUpperCase() }}
+          </div>
         </div>
 
         <div class="main">
@@ -120,7 +122,10 @@ export default {
             this.localError = errMsg || "Update failed";
           }
         }
-      });  
+      });
+    }
+  }
+};
 </script>
 
 <style scoped>
