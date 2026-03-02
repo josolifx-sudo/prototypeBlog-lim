@@ -2,7 +2,7 @@
   <div class="layout">
     <div class="main">
       <section class="hero glass">
-        <div class="badge">Strings the connects you!</div>
+        <div class="badge">Strings that connects you!</div>
         <h1>A meaningful conversation awaits you!</h1>
         <p class="muted">
           Find and share your thoughts on various topics. Join the conversation and connect with others through your words.
