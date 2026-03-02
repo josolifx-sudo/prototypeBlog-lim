@@ -28,13 +28,17 @@ router.post("/", requireAuth, async (req, res) => {
   }
 });
 
-// Delete comment (admin only, or optional owner delete if needed in the future)
+// Delete comment (owner or admin)
 router.delete("/:id", requireAuth, async (req, res) => {
   try {
-    if (!req.user.isAdmin) return res.status(403).json({ error: "Admin only" });
-
     const comment = await Comment.findById(req.params.id);
     if (!comment) return res.status(404).json({ error: "Comment not found" });
+
+    const isOwner = String(comment.author) === String(req.user._id);
+
+    if (!isOwner && !req.user.isAdmin) {
+      return res.status(403).json({ error: "Not allowed" });
+    }
 
     await comment.deleteOne();
     return res.json({ message: "Comment deleted" });

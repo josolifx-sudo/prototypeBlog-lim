@@ -46,9 +46,17 @@ export const useAuthStore = defineStore("auth", {
 
     async fetchMe() {
       if (!this.token) return;
+    
       try {
         const res = await api.get("/auth/me");
-        this.user = res.data.user;
+        const u = res.data.user;
+    
+        this.user = {
+          id: u._id || u.id,
+          email: u.email,
+          username: u.username,
+          isAdmin: !!u.isAdmin
+        };
       } catch (err) {
         this.logout();
       }

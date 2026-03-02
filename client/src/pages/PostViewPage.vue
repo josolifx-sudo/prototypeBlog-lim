@@ -38,8 +38,9 @@
   
       <CommentList
         :comments="posts.comments"
-        :canAdminDelete="auth.isAdmin"
-        @adminDelete="adminDeleteComment"
+        :currentUserId="auth.user?.id || ''"
+        :isAdmin="auth.isAdmin"
+        @deleteComment="handleDeleteComment"
       />
   
       <div v-if="auth.isLoggedIn">
@@ -157,6 +158,11 @@
         if (!res.ok) return;
         await posts.fetchPost(route.params.id);
       }
+
+      async function handleDeleteComment(commentId) {
+        const res = await posts.deleteComment(commentId);
+        if (!res.ok) return;        
+      }
   
       onMounted(load);
   
@@ -176,7 +182,8 @@
         saveEdit,
         removePost,
         submitComment,
-        adminDeleteComment
+        adminDeleteComment,
+        handleDeleteComment
       };
     }
   };

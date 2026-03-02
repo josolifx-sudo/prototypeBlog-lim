@@ -105,3 +105,18 @@ export const usePostsStore = defineStore("posts", {
     }
   }
 });
+    async deleteComment(commentId) {
+      this.error = null;
+      try {
+        await api.delete(`/comments/${commentId}`);
+
+        // Instant UI update
+        this.comments = this.comments.filter((c) => c._id !== commentId);
+
+        return { ok: true };
+      } catch (err) {
+        const msg = err?.response?.data?.error || "Failed to delete comment";
+        this.error = msg;
+        return { ok: false, error: msg };
+      }
+    },
