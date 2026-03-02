@@ -33,7 +33,7 @@
       </div>
     </header>
 
-    <main class="container">
+    <main class="container mainpad">
       <transition name="fade-up" mode="out-in">
         <router-view />
       </transition>
@@ -136,6 +136,7 @@ export default {
 <style scoped>
 .topbar {
   position: sticky;
+  min-height: var(--header-h);
   top: 0;
   z-index: 10;
   backdrop-filter: blur(14px);
@@ -224,5 +225,8 @@ export default {
 .footer {
   padding-top: 10px;
   padding-bottom: 30px;
+}
+.mainpad {
+  padding-top: calc(var(--header-h) + 14px);
 }
 </style>
