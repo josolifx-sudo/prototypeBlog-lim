@@ -104,12 +104,12 @@ export default {
   background:
     radial-gradient(
       520px 360px at var(--sx, 0px) var(--sy, 0px),
-      rgba(37, 99, 235, calc(0.18 * var(--sa, 0))),
+      rgba(37, 99, 235, calc(0.26 * var(--sa, 0))),
       transparent 58%
     ),
     radial-gradient(
       680px 460px at var(--sx, 0px) var(--sy, 0px),
-      rgba(124, 58, 237, calc(0.14 * var(--sa, 0))),
+      rgba(124, 58, 237, calc(0.20 * var(--sa, 0))),
       transparent 66%
     );
   pointer-events: none;

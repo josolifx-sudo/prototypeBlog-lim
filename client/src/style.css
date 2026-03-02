@@ -179,8 +179,10 @@ select:focus {
   position: fixed;
   inset: -60px;
   z-index: -1;
-  background: radial-gradient(circle at 10% 10%, rgba(110,231,255,0.10), transparent 45%),
-              radial-gradient(circle at 90% 20%, rgba(167,139,250,0.12), transparent 40%),
-              radial-gradient(circle at 30% 90%, rgba(34,197,94,0.08), transparent 45%);
+  pointer-events: none;   /* ✅ critical */
+  background:
+    radial-gradient(circle at 10% 10%, rgba(37,99,235,0.10), transparent 45%),
+    radial-gradient(circle at 90% 20%, rgba(124,58,237,0.12), transparent 40%),
+    radial-gradient(circle at 30% 90%, rgba(34,197,94,0.08), transparent 45%);
   animation: floatGlow 6s ease-in-out infinite;
 }
