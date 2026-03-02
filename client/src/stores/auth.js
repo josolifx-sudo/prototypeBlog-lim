@@ -1,0 +1,63 @@
+import { defineStore } from "pinia";
+import api from "../api/axios";
+
+export const useAuthStore = defineStore("auth", {
+  state: () => ({
+    user: null,
+    token: localStorage.getItem("token") || null,
+    loading: false,
+    error: null
+  }),
+  getters: {
+    isLoggedIn: (s) => !!s.token,
+    isAdmin: (s) => !!s.user?.isAdmin
+  },
+  actions: {
+    async register(payload) {
+      this.loading = true;
+      this.error = null;
+      try {
+        await api.post("/auth/register", payload);
+        return { ok: true };
+      } catch (err) {
+        this.error = err?.response?.data?.error || "Register failed";
+        return { ok: false, error: this.error };
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async login(payload) {
+      this.loading = true;
+      this.error = null;
+      try {
+        const res = await api.post("/auth/login", payload);
+        this.token = res.data.token;
+        localStorage.setItem("token", this.token);
+        this.user = res.data.user;
+        return { ok: true };
+      } catch (err) {
+        this.error = err?.response?.data?.error || "Login failed";
+        return { ok: false, error: this.error };
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async fetchMe() {
+      if (!this.token) return;
+      try {
+        const res = await api.get("/auth/me");
+        this.user = res.data.user;
+      } catch (err) {
+        this.logout();
+      }
+    },
+
+    logout() {
+      this.user = null;
+      this.token = null;
+      localStorage.removeItem("token");
+    }
+  }
+});
