@@ -102,9 +102,8 @@ export const usePostsStore = defineStore("posts", {
         this.error = msg;
         return { ok: false, error: msg };
       }
-    }
-  }
-});
+    },
+  
     async deleteComment(commentId) {
       this.error = null;
       try {
@@ -120,3 +119,5 @@ export const usePostsStore = defineStore("posts", {
         return { ok: false, error: msg };
       }
     },
+  }
+});
