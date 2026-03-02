@@ -1,167 +1,156 @@
 <template>
-    <div class="grid">
+  <div class="layout">
+    <div class="main">
       <section class="hero glass">
-        <div class="kicker">Strings the connects you!</div>
-        <div class="headline">A meaningful conversation awaits you!</div>
-        <div class="muted">
+        <div class="badge">Strings the connects you!</div>
+        <h1>A meaningful conversation awaits you!</h1>
+        <p class="muted">
           Find and share your thoughts on various topics. Join the conversation and connect with others through your words.
+        </p>
+
+        <div class="heroActions">
+          <button class="btn btn-primary" @click="goCreate">Create post</button>
+          <button class="btn" @click="refresh">Refresh</button>
         </div>
-
-      <div class="hero-actions">
-        <button v-if="auth.isLoggedIn" class="btn btn-primary" @click="openComposer = !openComposer">
-          {{ openComposer ? "Close composer" : "Create post" }}
-        </button>
-        <router-link v-else to="/login" class="btn btn-primary">Login to post</router-link>
-
-        <button class="btn btn-ghost" @click="refresh">Refresh</button>
-
-        <div class="swapwrap">
-          <FeedSwap v-model="mode" />
-        </div>
-      </div>
-
-      <transition name="fade-up">
-        <form v-if="openComposer" class="composer" @submit.prevent="create">
-          <input class="input" v-model="title" placeholder="Title" required />
-          <textarea v-model="content" rows="4" placeholder="Write your post..." required />
-          <div class="row">
-            <button class="btn btn-primary" :disabled="busy">
-              {{ busy ? "Saving..." : "Publish" }}
-            </button>
-            <div v-if="msg" class="muted">{{ msg }}</div>
-          </div>
-        </form>
-      </transition>
-    </section>
-
-    <section class="feed">
-      <div v-if="posts.loading" class="glass pad pulse muted">Loading feed...</div>
-      <div v-else-if="sortedFeed.length === 0" class="glass pad muted">No posts yet</div>
+      </section>
 
       <transition-group name="stagger" tag="div" class="list">
-        <StringsCard v-for="p in sortedFeed" :key="p._id" :post="p" />
+        <template v-if="posts.loading">
+          <SkeletonCard v-for="n in 4" :key="`sk-${n}`" />
+        </template>
+
+        <template v-else>
+          <StringsCard v-for="p in posts.feed" :key="p._id" :post="p" />
+        </template>
       </transition-group>
-    </section>
+
+      <div v-if="posts.error" class="muted pad">{{ posts.error }}</div>
+
+      <div ref="sentinel" class="sentinel">
+        <div v-if="posts.loadingMore" class="muted">Loading more...</div>
+        <div v-else-if="!posts.hasMore && !posts.loading" class="muted">You reached the end.</div>
+      </div>
+    </div>
+
+    <TrendingPanel :trending="posts.trending" :loading="posts.trendingLoading" />
   </div>
 </template>
 
 <script>
-import { computed, onMounted, ref } from "vue";
-import { useAuthStore } from "../stores/auth";
+import { onBeforeUnmount, onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import { usePostsStore } from "../stores/posts";
+
 import StringsCard from "../components/StringsCard.vue";
-import FeedSwap from "../components/FeedSwap.vue";
+import SkeletonCard from "../components/SkeletonCard.vue";
+import TrendingPanel from "../components/TrendingPanel.vue";
 
 export default {
   name: "FeedPage",
-  components: { StringsCard, FeedSwap },
+  components: { StringsCard, SkeletonCard, TrendingPanel },
   setup() {
-    const auth = useAuthStore();
     const posts = usePostsStore();
+    const router = useRouter();
 
-    const openComposer = ref(false);
-    const title = ref("");
-    const content = ref("");
-    const busy = ref(false);
-    const msg = ref("");
-
-    const mode = ref("latest");
-
-    const sortedFeed = computed(() => {
-      const list = [...posts.feed];
-
-      if (mode.value === "latest") {
-        return list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      }
-
-      return list.sort((a, b) => {
-        const alen = (a.content || "").length;
-        const blen = (b.content || "").length;
-        return blen - alen;
-      });
-    });
+    const sentinel = ref(null);
+    let io = null;
 
     async function refresh() {
-      await posts.fetchFeed();
+      await posts.fetchFeedFirstPage();
+      await posts.fetchTrending();
     }
 
-    async function create() {
-      msg.value = "";
-      busy.value = true;
+    function goCreate() {
+      router.push("/create");
+    }
 
-      const res = await posts.createPost({ title: title.value, content: content.value });
-      busy.value = false;
+    function setupObserver() {
+      if (!sentinel.value) return;
 
-      if (!res.ok) {
-        msg.value = res.error;
-        return;
-      }
+      io = new IntersectionObserver(
+        async (entries) => {
+          const e = entries[0];
+          if (e.isIntersecting) {
+            await posts.fetchMore();
+          }
+        },
+        { root: null, threshold: 0.2 }
+      );
 
-      title.value = "";
-      content.value = "";
-      openComposer.value = false;
-
-      await posts.fetchFeed();
-      msg.value = "Posted";
-      setTimeout(() => (msg.value = ""), 1500);
+      io.observe(sentinel.value);
     }
 
     onMounted(async () => {
-      if (auth.token && !auth.user) await auth.fetchMe();
-      await posts.fetchFeed();
+      await refresh();
+      setupObserver();
     });
 
-    return {
-      auth,
-      posts,
-      openComposer,
-      title,
-      content,
-      busy,
-      msg,
-      create,
-      refresh,
-      mode,
-      sortedFeed
-    };
+    onBeforeUnmount(() => {
+      if (io) io.disconnect();
+    });
+
+    return { posts, sentinel, refresh, goCreate };
   }
 };
 </script>
 
 <style scoped>
-.grid { display: grid; gap: 14px; }
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 16px;
+  align-items: start;
+}
 
-.hero { padding: 16px; border-radius: var(--radius); }
+@media (max-width: 980px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
 
-.kicker {
-  display: inline-block;
+.main {
+  display: grid;
+  gap: 14px;
+}
+
+.hero {
+  padding: 18px;
+  border-radius: var(--radius);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
   padding: 8px 10px;
   border-radius: 999px;
   border: 1px solid var(--line);
-  background: rgba(255,255,255,0.06);
-  font-weight: 800;
+  background: rgba(255,255,255,0.75);
+  font-weight: 850;
   margin-bottom: 10px;
 }
 
-.headline { font-size: 26px; font-weight: 900; margin-bottom: 6px; }
+h1 {
+  margin: 6px 0 8px;
+  font-size: 28px;
+  line-height: 1.15;
+}
 
-.hero-actions {
+.heroActions {
+  margin-top: 12px;
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
-  margin-top: 12px;
-  align-items: center;
 }
 
-.swapwrap {
-  margin-left: auto;
+.list {
+  display: grid;
+  gap: 12px;
 }
 
-.composer { margin-top: 12px; display: grid; gap: 10px; }
+.sentinel {
+  padding: 16px 0;
+  text-align: center;
+}
 
-.row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-
-.feed .pad { padding: 14px; border-radius: var(--radius); }
-
-.list { display: grid; gap: 12px; }
+.pad { padding: 10px 0; }
 </style>

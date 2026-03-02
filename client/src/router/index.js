@@ -21,7 +21,12 @@ const router = createRouter({
     { path: "/profile", name: "profile", component: ProfilePage, meta: { requiresAuth: true } },
     { path: "/admin", name: "admin", component: AdminDashboardPage, meta: { requiresAuth: true, requiresAdmin: true } },
 
-    { path: "/:pathMatch(.*)*", name: "notfound", component: NotFoundPage }
+    { path: "/:pathMatch(.*)*", name: "notfound", component: NotFoundPage },
+    {
+      path: "/create",
+      name: "create",
+      component: () => import("../pages/CreatePostPage.vue")
+    }
   ],
   scrollBehavior() {
     return { top: 0 };

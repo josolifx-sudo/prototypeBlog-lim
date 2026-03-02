@@ -4,13 +4,12 @@
     class="card glass"
     @mousemove="onMove"
     @mouseleave="onLeave"
-    @click="open"
   >
     <div class="spot" aria-hidden="true"></div>
 
-    <div class="head">
+    <div class="head" @click="open">
       <div class="avatar">
-        <img v-if="post.author?.avatarUrl" :src="post.author.avatarUrl" alt="avatar" />
+        <img v-if="post.author?.avatarUrl" :src="post.author.avatarUrl" class="avatarImg" />
         <span v-else>{{ initials }}</span>
       </div>
 
@@ -23,10 +22,18 @@
       </div>
     </div>
 
-    <div class="content muted">{{ preview }}</div>
+    <div v-if="post.imageUrl" class="imgWrap" @click="open">
+      <img :src="post.imageUrl" class="postImg" />
+    </div>
+
+    <div class="content muted" @click="open">{{ preview }}</div>
 
     <div class="actions">
-      <div class="pill">Open</div>
+      <button class="iconBtn" type="button" @click="like">
+        <span class="heart" :class="{ on: post.likedByMe }">♥</span>
+        <span class="count">{{ post.likeCount || 0 }}</span>
+      </button>
+
       <div class="muted tiny">Click to view</div>
     </div>
   </article>
@@ -34,6 +41,8 @@
 
 <script>
 import { computed, ref } from "vue";
+import { useRouter } from "vue-router";
+import { usePostsStore } from "../stores/posts";
 
 export default {
   name: "StringsCard",
@@ -42,6 +51,8 @@ export default {
   },
   setup(props) {
     const card = ref(null);
+    const router = useRouter();
+    const posts = usePostsStore();
 
     const initials = computed(() => {
       const u = props.post?.author?.username || "U";
@@ -69,7 +80,6 @@ export default {
     function onMove(e) {
       const el = card.value;
       if (!el) return;
-
       const r = el.getBoundingClientRect();
       setVars(e.clientX - r.left, e.clientY - r.top, 1);
     }
@@ -79,10 +89,14 @@ export default {
     }
 
     function open() {
-      window.location.href = `/post/${props.post._id}`;
+      router.push(`/post/${props.post._id}`);
     }
 
-    return { card, initials, preview, timeLabel, onMove, onLeave, open };
+    async function like() {
+      await posts.toggleLike(props.post._id);
+    }
+
+    return { card, initials, preview, timeLabel, onMove, onLeave, open, like };
   }
 };
 </script>
@@ -93,7 +107,6 @@ export default {
   overflow: hidden;
   padding: 14px;
   border-radius: var(--radius);
-  cursor: pointer;
   transform: translateY(0);
   transition: transform 160ms ease, box-shadow 180ms ease, background 180ms ease;
 }
@@ -127,6 +140,7 @@ export default {
   display: flex;
   gap: 12px;
   align-items: flex-start;
+  cursor: pointer;
 }
 
 .avatar {
@@ -141,11 +155,16 @@ export default {
   overflow: hidden;
 }
 
-.avatar img {
+.avatarImg {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
+  animation: avIn 220ms ease;
+}
+
+@keyframes avIn {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 .meta { flex: 1; }
@@ -158,7 +177,25 @@ export default {
 }
 
 .name { font-weight: 850; }
-.title { margin-top: 4px; font-weight: 800; }
+.title { margin-top: 4px; font-weight: 900; }
+
+.imgWrap {
+  position: relative;
+  z-index: 1;
+  margin-top: 10px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  cursor: pointer;
+}
+
+.postImg {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+  background: rgba(255,255,255,0.7);
+}
 
 .content {
   position: relative;
@@ -166,6 +203,7 @@ export default {
   margin-top: 10px;
   line-height: 1.55;
   white-space: pre-wrap;
+  cursor: pointer;
 }
 
 .actions {
@@ -177,12 +215,31 @@ export default {
   align-items: center;
 }
 
-.pill {
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   padding: 8px 10px;
   border-radius: 999px;
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.65);
+  background: rgba(255,255,255,0.65);
+  cursor: pointer;
 }
 
+.heart {
+  font-size: 16px;
+  transform: translateY(-1px);
+  transition: transform 140ms ease;
+  color: rgba(17,24,39,0.45);
+}
+
+.heart.on {
+  color: #e11d48;
+  transform: scale(1.15);
+}
+
+.count {
+  font-weight: 850;
+}
 .tiny { font-size: 12px; }
 </style>
