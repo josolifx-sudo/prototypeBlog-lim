@@ -20,3 +20,6 @@ Password: admin123
 
 ## Frontend
 Got ideas from reactbits.dev then asked for help from AI to recreate it in Vue, CSS, small JS interactions, and Vue transitions.
+
+## URL
+https://prototype-blog-lim.vercel.app
