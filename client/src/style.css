@@ -116,3 +116,55 @@ a { color: inherit; text-decoration: none; }
 .glow-border {
   box-shadow: 0 0 0 1px rgba(110, 231, 255, 0.18), var(--shadow);
 }
+/* Animations */
+@keyframes floatGlow {
+  0% { filter: blur(0px); opacity: 0.65; }
+  50% { filter: blur(2px); opacity: 0.85; }
+  100% { filter: blur(0px); opacity: 0.65; }
+}
+
+@keyframes shimmer {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+/* Page transition */
+.fade-up-enter-active,
+.fade-up-leave-active {
+  transition: opacity 220ms ease, transform 220ms ease, filter 220ms ease;
+}
+
+.fade-up-enter-from,
+.fade-up-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+  filter: blur(4px);
+}
+
+/* Stagger list transition */
+.stagger-enter-active {
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+.stagger-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+/* Buttons micro-interaction */
+.btn {
+  transition: transform 120ms ease, box-shadow 180ms ease, background 180ms ease, border 180ms ease;
+}
+.btn:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+/* Subtle animated background layer */
+.bg-anim {
+  position: fixed;
+  inset: -60px;
+  z-index: -1;
+  background: radial-gradient(circle at 10% 10%, rgba(110,231,255,0.10), transparent 45%),
+              radial-gradient(circle at 90% 20%, rgba(167,139,250,0.12), transparent 40%),
+              radial-gradient(circle at 30% 90%, rgba(34,197,94,0.08), transparent 45%);
+  animation: floatGlow 6s ease-in-out infinite;
+}

@@ -38,9 +38,9 @@
       <div v-if="posts.loading" class="glass pad pulse muted">Loading feed...</div>
       <div v-else-if="sortedFeed.length === 0" class="glass pad muted">No posts yet</div>
 
-      <div v-else class="list">
+      <transition-group name="stagger" tag="div" class="list">
         <StringsCard v-for="p in sortedFeed" :key="p._id" :post="p" />
-      </div>
+      </transition-group>
     </section>
   </div>
 </template>

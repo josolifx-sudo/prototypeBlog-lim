@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="bg-anim" aria-hidden="true">
     <header class="topbar">
       <div class="topbar-inner">
         <router-link to="/" class="brand">
