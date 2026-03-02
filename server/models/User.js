@@ -5,7 +5,10 @@ const userSchema = new mongoose.Schema(
     username: { type: String, required: true, trim: true, minlength: 3, maxlength: 30, unique: true },
     email: { type: String, required: true, trim: true, lowercase: true, unique: true },
     passwordHash: { type: String, required: true },
-    isAdmin: { type: Boolean, default: false }
+    isAdmin: { type: Boolean, default: false },
+
+    photos: { type: [String], default: [] },
+    avatarUrl: { type: String, default: "" }
   },
   { timestamps: true }
 );

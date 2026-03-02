@@ -10,6 +10,26 @@ function isEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
+function isHttpUrl(value) {
+  try {
+    const u = new URL(value);
+    return u.protocol === "http:" || u.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function safeUser(u) {
+  return {
+    id: u._id,
+    email: u.email,
+    username: u.username,
+    isAdmin: u.isAdmin,
+    avatarUrl: u.avatarUrl || "",
+    photos: u.photos || []
+  };
+}
+
 router.post("/register", async (req, res) => {
   try {
     const { email, username, password } = req.body;
@@ -26,11 +46,18 @@ router.post("/register", async (req, res) => {
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const user = await User.create({ email, username, passwordHash, isAdmin: false });
+    const user = await User.create({
+      email,
+      username,
+      passwordHash,
+      isAdmin: false,
+      photos: [],
+      avatarUrl: ""
+    });
 
     return res.status(201).json({
       message: "Registered successfully",
-      user: { id: user._id, email: user.email, username: user.username, isAdmin: user.isAdmin }
+      user: safeUser(user)
     });
   } catch (err) {
     return res.status(500).json({ error: "Server error on register" });
@@ -57,7 +84,7 @@ router.post("/login", async (req, res) => {
     return res.json({
       message: "Login successful",
       token,
-      user: { id: user._id, email: user.email, username: user.username, isAdmin: user.isAdmin }
+      user: safeUser(user)
     });
   } catch (err) {
     return res.status(500).json({ error: "Server error on login" });
@@ -66,6 +93,73 @@ router.post("/login", async (req, res) => {
 
 router.get("/me", requireAuth, async (req, res) => {
   return res.json({ user: req.user });
+});
+
+router.put("/photos", requireAuth, async (req, res) => {
+  try {
+    const { url } = req.body;
+    if (!url) return res.status(400).json({ error: "url is required" });
+    if (!isHttpUrl(url)) return res.status(400).json({ error: "url must be http or https" });
+
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const photos = user.photos || [];
+    if (photos.length >= 5) return res.status(400).json({ error: "Maximum of 5 photos only" });
+
+    if (photos.includes(url)) return res.status(409).json({ error: "Photo already exists" });
+
+    user.photos.push(url);
+
+    if (!user.avatarUrl) user.avatarUrl = url;
+
+    await user.save();
+    return res.json({ message: "Photo added", user: safeUser(user) });
+  } catch (err) {
+    return res.status(500).json({ error: "Server error adding photo" });
+  }
+});
+
+router.delete("/photos", requireAuth, async (req, res) => {
+  try {
+    const { url } = req.body;
+    if (!url) return res.status(400).json({ error: "url is required" });
+
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    user.photos = (user.photos || []).filter((p) => p !== url);
+
+    if (user.avatarUrl === url) {
+      user.avatarUrl = user.photos[0] || "";
+    }
+
+    await user.save();
+    return res.json({ message: "Photo removed", user: safeUser(user) });
+  } catch (err) {
+    return res.status(500).json({ error: "Server error removing photo" });
+  }
+});
+
+router.put("/avatar", requireAuth, async (req, res) => {
+  try {
+    const { url } = req.body;
+    if (!url) return res.status(400).json({ error: "url is required" });
+
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    if (!(user.photos || []).includes(url)) {
+      return res.status(400).json({ error: "Avatar must be one of your saved photos" });
+    }
+
+    user.avatarUrl = url;
+    await user.save();
+
+    return res.json({ message: "Avatar updated", user: safeUser(user) });
+  } catch (err) {
+    return res.status(500).json({ error: "Server error updating avatar" });
+  }
 });
 
 module.exports = router;

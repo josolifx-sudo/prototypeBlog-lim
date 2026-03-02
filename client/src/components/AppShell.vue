@@ -1,5 +1,7 @@
 <template>
-  <div class="bg-anim" aria-hidden="true">
+  <div>
+    <div class="bg-anim" aria-hidden="true"></div>
+
     <header class="topbar">
       <div class="topbar-inner">
         <router-link to="/" class="brand">
@@ -14,15 +16,10 @@
 
           <template v-if="auth.isLoggedIn">
             <router-link ref="linkProfile" to="/profile" class="pilllink">Profile</router-link>
-            <router-link
-              v-if="auth.isAdmin"
-              ref="linkAdmin"
-              to="/admin"
-              class="pilllink"
-            >
+            <router-link v-if="auth.isAdmin" ref="linkAdmin" to="/admin" class="pilllink">
               Admin
             </router-link>
-            <button class="pillbtn" @click="logout">Logout</button>
+            <button class="pillbtn" type="button" @click="logout">Logout</button>
           </template>
 
           <template v-else>
@@ -105,19 +102,8 @@ export default {
       await syncPill();
     });
 
-    watch(
-      () => route.path,
-      async () => {
-        await syncPill();
-      }
-    );
-
-    watch(
-      () => auth.isLoggedIn,
-      async () => {
-        await syncPill();
-      }
-    );
+    watch(() => route.path, syncPill);
+    watch(() => auth.isLoggedIn, syncPill);
 
     return {
       auth,
@@ -138,7 +124,7 @@ export default {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: rgba(246, 247, 251, 0.72);
+  background: rgba(246, 247, 251, 0.82);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--line);
 }
@@ -166,7 +152,7 @@ export default {
   height: 12px;
   border-radius: 999px;
   background: linear-gradient(135deg, var(--brand), var(--brand2));
-  box-shadow: 0 0 0 6px rgba(110, 231, 255, 0.10);
+  box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.10);
 }
 
 .pillnav {
@@ -177,7 +163,7 @@ export default {
   padding: 6px;
   border-radius: 999px;
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.55);
 }
 
 .pill {
@@ -186,12 +172,8 @@ export default {
   top: 6px;
   height: calc(100% - 12px);
   border-radius: 999px;
-  background: linear-gradient(
-    135deg,
-    rgba(110, 231, 255, 0.45),
-    rgba(167, 139, 250, 0.40)
-  );
-  box-shadow: 0 0 12px rgba(110, 231, 255, 0.35);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.22), rgba(124, 58, 237, 0.18));
+  box-shadow: 0 0 12px rgba(37, 99, 235, 0.14);
   transition: transform 220ms ease, width 220ms ease;
   pointer-events: none;
 }
@@ -225,6 +207,7 @@ export default {
   padding-top: 10px;
   padding-bottom: 30px;
 }
+
 .mainpad {
   padding-top: calc(var(--header-h) + 10px);
 }

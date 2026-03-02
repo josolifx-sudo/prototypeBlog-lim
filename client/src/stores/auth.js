@@ -13,6 +13,18 @@ export const useAuthStore = defineStore("auth", {
     isAdmin: (s) => !!s.user?.isAdmin
   },
   actions: {
+    normalizeUser(u) {
+      if (!u) return null;
+      return {
+        id: u._id || u.id,
+        email: u.email,
+        username: u.username,
+        isAdmin: !!u.isAdmin,
+        avatarUrl: u.avatarUrl || "",
+        photos: Array.isArray(u.photos) ? u.photos : []
+      };
+    },
+
     async register(payload) {
       this.loading = true;
       this.error = null;
@@ -34,7 +46,7 @@ export const useAuthStore = defineStore("auth", {
         const res = await api.post("/auth/login", payload);
         this.token = res.data.token;
         localStorage.setItem("token", this.token);
-        this.user = res.data.user;
+        this.user = this.normalizeUser(res.data.user);
         return { ok: true };
       } catch (err) {
         this.error = err?.response?.data?.error || "Login failed";
@@ -46,19 +58,50 @@ export const useAuthStore = defineStore("auth", {
 
     async fetchMe() {
       if (!this.token) return;
-    
       try {
         const res = await api.get("/auth/me");
-        const u = res.data.user;
-    
-        this.user = {
-          id: u._id || u.id,
-          email: u.email,
-          username: u.username,
-          isAdmin: !!u.isAdmin
-        };
+        this.user = this.normalizeUser(res.data.user);
       } catch (err) {
         this.logout();
+      }
+    },
+
+    async addPhoto(url) {
+      this.error = null;
+      try {
+        const res = await api.put("/auth/photos", { url });
+        this.user = this.normalizeUser(res.data.user);
+        return { ok: true };
+      } catch (err) {
+        const msg = err?.response?.data?.error || "Failed to add photo";
+        this.error = msg;
+        return { ok: false, error: msg };
+      }
+    },
+
+    async removePhoto(url) {
+      this.error = null;
+      try {
+        const res = await api.delete("/auth/photos", { data: { url } });
+        this.user = this.normalizeUser(res.data.user);
+        return { ok: true };
+      } catch (err) {
+        const msg = err?.response?.data?.error || "Failed to remove photo";
+        this.error = msg;
+        return { ok: false, error: msg };
+      }
+    },
+
+    async setAvatar(url) {
+      this.error = null;
+      try {
+        const res = await api.put("/auth/avatar", { url });
+        this.user = this.normalizeUser(res.data.user);
+        return { ok: true };
+      } catch (err) {
+        const msg = err?.response?.data?.error || "Failed to set avatar";
+        this.error = msg;
+        return { ok: false, error: msg };
       }
     },
 

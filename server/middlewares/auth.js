@@ -15,7 +15,7 @@ async function requireAuth(req, res, next) {
 
     const payload = jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = await User.findById(payload.id).select("_id username email isAdmin");
+    const user = await User.findById(payload.id).select("_id username email isAdmin avatarUrl photos");
     if (!user) return res.status(401).json({ error: "Invalid token user" });
 
     req.user = user;

@@ -21,9 +21,7 @@
 
 * { box-sizing: border-box; }
 
-html, body {
-  height: 100%;
-}
+html, body { height: 100%; }
 
 body {
   margin: 0;
@@ -33,6 +31,11 @@ body {
 }
 
 a { color: inherit; text-decoration: none; }
+
+#app {
+  position: relative;
+  z-index: 1;
+}
 
 .container {
   width: min(980px, calc(100% - 32px));
@@ -58,22 +61,25 @@ a { color: inherit; text-decoration: none; }
   background: rgba(255, 255, 255, 0.75);
   color: var(--text);
   cursor: pointer;
+  transition: transform 120ms ease, box-shadow 180ms ease, background 180ms ease, border 180ms ease;
 }
 
 .btn:hover {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
+.btn:active {
+  transform: translateY(1px) scale(0.99);
+}
+
 .btn-primary {
   background: linear-gradient(135deg, var(--brand), var(--brand2));
   border: 0;
-  color: white;
+  color: #fff;
   box-shadow: 0 12px 30px rgba(37, 99, 235, 0.20);
 }
 
-.btn-ghost {
-  background: transparent;
-}
+.btn-ghost { background: transparent; }
 
 .btn-danger {
   background: rgba(239, 68, 68, 0.10);
@@ -81,9 +87,7 @@ a { color: inherit; text-decoration: none; }
   color: #991b1b;
 }
 
-.input,
-textarea,
-select {
+.input, textarea, select {
   width: 100%;
   padding: 10px 12px;
   border-radius: 14px;
@@ -93,29 +97,13 @@ select {
   outline: none;
 }
 
-.input:focus,
-textarea:focus,
-select:focus {
+.input:focus, textarea:focus, select:focus {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
   border-color: rgba(37, 99, 235, 0.35);
 }
 
-.muted {
-  color: var(--muted);
-}
+.muted { color: var(--muted); }
 
-.fade-up-enter-active, .fade-up-leave-active { transition: all 180ms ease; }
-.fade-up-enter-from { opacity: 0; transform: translateY(8px); }
-.fade-up-leave-to { opacity: 0; transform: translateY(8px); }
-
-.pulse {
-  animation: pulse 1.8s ease-in-out infinite;
-}
-@keyframes pulse {
-  0%, 100% { opacity: 0.75; }
-  50% { opacity: 1; }
-}
-/* Motion preferences */
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.001ms !important;
@@ -125,30 +113,9 @@ select:focus {
   }
 }
 
-/* Utility */
-.soft-outline {
-  border: 1px solid var(--line);
-}
-
-.glow-border {
-  box-shadow: 0 0 0 1px rgba(110, 231, 255, 0.18), var(--shadow);
-}
-/* Animations */
-@keyframes floatGlow {
-  0% { opacity: 0.55; transform: translateY(0px); }
-  50% { opacity: 0.75; transform: translateY(6px); }
-  100% { opacity: 0.55; transform: translateY(0px); }
-}
-
-@keyframes shimmer {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 100% 50%; }
-}
-
-/* Page transition */
 .fade-up-enter-active,
 .fade-up-leave-active {
-  transition: opacity 220ms ease, transform 220ms ease, filter 220ms ease;
+  transition: opacity 220ms ease, transform 220ms ease;
 }
 
 .fade-up-enter-from,
@@ -157,29 +124,33 @@ select:focus {
   transform: translateY(10px);
 }
 
-/* Stagger list transition */
 .stagger-enter-active {
   transition: opacity 220ms ease, transform 220ms ease;
 }
+
 .stagger-enter-from {
   opacity: 0;
   transform: translateY(10px);
 }
 
-/* Buttons micro-interaction */
-.btn {
-  transition: transform 120ms ease, box-shadow 180ms ease, background 180ms ease, border 180ms ease;
-}
-.btn:active {
-  transform: translateY(1px) scale(0.99);
+.pulse { animation: pulse 1.8s ease-in-out infinite; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 1; }
 }
 
-/* Subtle animated background layer */
+@keyframes floatGlow {
+  0% { opacity: 0.55; transform: translateY(0px); }
+  50% { opacity: 0.75; transform: translateY(6px); }
+  100% { opacity: 0.55; transform: translateY(0px); }
+}
+
 .bg-anim {
   position: fixed;
   inset: -60px;
-  z-index: -1;
-  pointer-events: none;   /* ✅ critical */
+  z-index: 0;
+  pointer-events: none;
   background:
     radial-gradient(circle at 10% 10%, rgba(37,99,235,0.10), transparent 45%),
     radial-gradient(circle at 90% 20%, rgba(124,58,237,0.12), transparent 40%),
