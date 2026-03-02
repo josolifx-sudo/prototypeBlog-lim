@@ -120,8 +120,7 @@ export default {
             this.localError = errMsg || "Update failed";
           }
         }
-      });
-    }
+      });  
 </script>
 
 <style scoped>
