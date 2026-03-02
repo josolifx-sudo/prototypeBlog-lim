@@ -19,6 +19,11 @@ function isHttpUrl(value) {
   }
 }
 
+// Optional but recommended: ensure it's a direct image file url
+function looksLikeImageUrl(value) {
+  return /\.(png|jpe?g|webp|gif)$/i.test(value.split("?")[0]);
+}
+
 function safeUser(u) {
   return {
     id: u._id,
@@ -95,18 +100,24 @@ router.get("/me", requireAuth, async (req, res) => {
   return res.json({ user: req.user });
 });
 
+// Add photo (max 5)
 router.put("/photos", requireAuth, async (req, res) => {
   try {
     const { url } = req.body;
+
     if (!url) return res.status(400).json({ error: "url is required" });
     if (!isHttpUrl(url)) return res.status(400).json({ error: "url must be http or https" });
+
+    // Recommended: require direct image link
+    if (!looksLikeImageUrl(url)) {
+      return res.status(400).json({ error: "Please use a direct image link that ends in .jpg, .png, .webp, or .gif" });
+    }
 
     const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ error: "User not found" });
 
     const photos = user.photos || [];
     if (photos.length >= 5) return res.status(400).json({ error: "Maximum of 5 photos only" });
-
     if (photos.includes(url)) return res.status(409).json({ error: "Photo already exists" });
 
     user.photos.push(url);
@@ -120,6 +131,7 @@ router.put("/photos", requireAuth, async (req, res) => {
   }
 });
 
+// Remove photo
 router.delete("/photos", requireAuth, async (req, res) => {
   try {
     const { url } = req.body;
@@ -141,6 +153,7 @@ router.delete("/photos", requireAuth, async (req, res) => {
   }
 });
 
+// Set avatar (must be one of saved photos)
 router.put("/avatar", requireAuth, async (req, res) => {
   try {
     const { url } = req.body;
